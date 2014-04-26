@@ -407,6 +407,7 @@ search box - the end user will not know they are happening.
             "enable_rangeselect": false,
             "include_facets_in_querystring": false,
             "result_display": resdisplay,
+            "display_result_as": 'table',
             "display_images": true,
             "search_url":"",
             "datatype":"jsonp",
@@ -937,27 +938,60 @@ search box - the end user will not know they are happening.
                 data.found <= to ? $('.facetview_increment', obj).html('..') : "";
             }
 
-            // put the filtered results on the page
-            $('#facetview_results',obj).html("");
-            var infofiltervals = new Array();
-            $.each(data.records, function(index, value) {
-                // write them out to the results div
-                 $('#facetview_results', obj).append( buildrecord(index) );
-                 options.linkify ? $('#facetview_results tr:last-child', obj).linkify() : false;
-            });
-            if ( options.result_box_colours.length > 0 ) {
-                jQuery('.result_box', obj).each(function () {
-                    var colour = options.result_box_colours[Math.floor(Math.random()*options.result_box_colours.length)] ;
-                    jQuery(this).css("background-color", colour);
-                });
-            }
-            $('#facetview_results', obj).children().hide().fadeIn(options.fadein);
-            $('.facetview_viewrecord', obj).bind('click',viewrecord);
-            jQuery('.notify_loading').hide();
+            if (options.display_result_as == 'chart')
+                chartData(data);
+            else
+                tabulateData(data);
+            
             // if a post search callback is provided, run it
             if (typeof options.post_search_callback == 'function') {
                 options.post_search_callback.call(this);
             }
+        };
+
+        var chartData = function(data) {
+            $('#facetview_results', obj).html("").attr("style", "width: 800px; height: 500px;");
+
+            var facet = null;
+            $.each(options.facets, function (idx, item) {
+                if (item.field == options.default_chart_field) {
+                    facet = item;
+                }
+            });
+            
+            var array_data = [[facet.display, 'Total']];
+            $.each(data.facets[facet.field], function (key, val) {
+                array_data.push([key, val]);
+            });
+            var chart_data = google.visualization.arrayToDataTable(array_data);
+
+            var chart_options = {
+                title: facet.display,
+                pieHole: 0.4,
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('facetview_results'));
+            chart.draw(chart_data, chart_options);
+        };
+
+        var tabulateData = function(data) {
+            // put the filtered results on the page
+            $('#facetview_results', obj).html("");
+
+            $.each(data.records, function (index, value) {
+                // write them out to the results div
+                $('#facetview_results', obj).append(buildrecord(index));
+                options.linkify ? $('#facetview_results tr:last-child', obj).linkify() : false;
+            });
+            if (options.result_box_colours.length > 0) {
+                jQuery('.result_box', obj).each(function () {
+                    var colour = options.result_box_colours[Math.floor(Math.random() * options.result_box_colours.length)];
+                    jQuery(this).css("background-color", colour);
+                });
+            }
+            $('#facetview_results', obj).children().hide().fadeIn(options.fadein);
+            $('.facetview_viewrecord', obj).bind('click', viewrecord);
+            jQuery('.notify_loading').hide();
         };
 
         // ===============================================

@@ -15,6 +15,8 @@
     <script type="text/javascript" src="vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
 
     <script type="text/javascript" src="http://momentjs.com/downloads/moment.min.js"></script>
+    
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
     <script type="text/javascript" src="jquery.facetview.js"></script>
 
@@ -23,11 +25,17 @@
     <link rel="stylesheet" href="css/style.css">
 
     <script type="text/javascript">
-        jQuery(document).ready(function ($) {
+
+        google.load("visualization", "1", { packages: ["corechart"] });
+        
+        jQuery(document).ready(function ($) {          
+            
             $('.facet-view-simple').facetview({
                 search_url: 'http://localhost:9200/membership2/elasticactivitymodel/_search?',
                 search_index: 'log',
                 enable_rangeselect: true,
+                display_result_as: 'chart',
+                default_chart_field: 'browserType',
                 facets: [
                     {
                         field: 'date',
@@ -43,7 +51,7 @@
                     {'field': 'activity', 'display': 'Activity'},
                     {'field': 'siteReferrer', 'display': 'Site Referrer'},
                     {'field': 'pageReferrer', 'display': 'Page Referrer'},		
-                    { 'field': 'dayOfTheWeek', 'display': 'DayOfTheWeek' },
+                    { 'field': 'dayOfTheWeek', 'display': 'DayOfTheWeek' }
                 ],
                 paging: {
                     from: 0,
