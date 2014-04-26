@@ -585,22 +585,24 @@ search box - the end user will not know they are happening.
             var values = [];
             var valsobj = $( '#facetview_' + $(this).attr('href').replace(/\./gi,'_'), obj );
             valsobj.find('.facetview_filterchoice', obj).each(function() {
-                values.push( $(this).attr('href') );
+                values.push({ value: $(this).attr('href'), display: $(this).data('display') });
             });
-            values = values.sort();
+            values = values.sort(function(a, b) {
+                return ((a.value < b.value) ? -1 : ((a.value > b.value) ? 1 : 0));
+            });
             $( "#facetview_slider_" + rel, obj ).slider({
                 range: true,
                 min: 0,
                 max: values.length-1,
                 values: [0,values.length-1],
                 slide: function( event, ui ) {
-                    $('#facetview_rangechoices_' + rel + ' .facetview_lowrangeval_' + rel, obj).html( values[ ui.values[0] ] );
-                    $('#facetview_rangechoices_' + rel + ' .facetview_highrangeval_' + rel, obj).html( values[ ui.values[1] ] );
+                    $('#facetview_rangechoices_' + rel + ' .facetview_lowrangeval_' + rel, obj).html(values[ui.values[0]].display).attr('data-value', values[ui.values[0]].value);
+                    $('#facetview_rangechoices_' + rel + ' .facetview_highrangeval_' + rel, obj).html(values[ui.values[1]].display).attr('data-value', values[ui.values[1]].value);
                     dofacetrange( rel );
                 }
             });
-            $('#facetview_rangechoices_' + rel + ' .facetview_lowrangeval_' + rel, obj).html( values[0] );
-            $('#facetview_rangechoices_' + rel + ' .facetview_highrangeval_' + rel, obj).html( values[ values.length-1] );
+            $('#facetview_rangechoices_' + rel + ' .facetview_lowrangeval_' + rel, obj).html(values[0].display);
+            $('#facetview_rangechoices_' + rel + ' .facetview_highrangeval_' + rel, obj).html(values[values.length - 1].display);
         };
 
         // pass a list of filters to be displayed
@@ -877,7 +879,7 @@ search box - the end user will not know they are happening.
                     }
                     
                     var append = '<tr class="facetview_filtervalue" style="display:none;"><td><a class="facetview_filterchoice' +
-                        '" rel="' + facet.field + '" href="' + item + '">' + display_value +
+                        '" rel="' + facet.field + '" href="' + item + '" data-display="' + display_value + '">' + display_value +
                         ' (' + records[item] + ')</a></td></tr>';
                     facet_filter.append(append);
                 }
@@ -996,8 +998,8 @@ search box - the end user will not know they are happening.
                 !bool ? bool = {'must': [] } : "";
                 if ( $(this).hasClass('facetview_facetrange') ) {
                     var rngs = {
-                        'from': $('.facetview_lowrangeval_' + $(this).attr('rel'), this).html(),
-                        'to': $('.facetview_highrangeval_' + $(this).attr('rel'), this).html()
+                        'from': $('.facetview_lowrangeval_' + $(this).attr('rel'), this).data('value'),
+                        'to': $('.facetview_highrangeval_' + $(this).attr('rel'), this).data('value')
                     };
                     var rel = options.facets[ $(this).attr('rel') ]['field'];
                     var robj = {'range': {}};
