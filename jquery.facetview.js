@@ -852,9 +852,9 @@ search box - the end user will not know they are happening.
         var viewrecord = function(event) {
             event.preventDefault();
             var record = options.data['records'][$(this).attr('href')];
-            alert(JSON.stringify(record,"","    "));
-            
-        }
+            alert(JSON.stringify(record, "", "    "));
+
+        };
 
         // put the results on the page
         var showresults = function(sdata) {
@@ -864,15 +864,20 @@ search box - the end user will not know they are happening.
             options.data = data;
             
             // for each filter setup, find the results for it and append them to the relevant filter
-            for ( var each = 0; each < options.facets.length; each++ ) {
-                var facet = options.facets[each]['field'];
-                var facetclean = options.facets[each]['field'].replace(/\./gi,'_').replace(/\:/gi,'_');
+            for ( var i = 0; i < options.facets.length; i++ ) {
+                var facet = options.facets[i];
+                var facetclean = facet.field.replace(/\./gi, '_').replace(/\:/gi, '_');
                 var facet_filter = $('[id="facetview_'+facetclean+'"]', obj);
                 facet_filter.children().find('.facetview_filtervalue').remove();
-                var records = data["facets"][ facet ];
-                for ( var item in records ) {
+                var records = data["facets"][ facet.field ];
+                for (var item in records) {
+                    var display_value = item;
+                    if (facet.formatter) {
+                        display_value = facet.formatter(item);
+                    }
+                    
                     var append = '<tr class="facetview_filtervalue" style="display:none;"><td><a class="facetview_filterchoice' +
-                        '" rel="' + facet + '" href="' + item + '">' + item +
+                        '" rel="' + facet.field + '" href="' + item + '">' + display_value +
                         ' (' + records[item] + ')</a></td></tr>';
                     facet_filter.append(append);
                 }
